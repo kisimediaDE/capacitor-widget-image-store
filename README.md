@@ -14,6 +14,7 @@ npx cap sync
 <docgen-index>
 
 * [`save(...)`](#save)
+* [`delete(...)`](#delete)
 
 </docgen-index>
 
@@ -31,6 +32,19 @@ save(options: { base64: string; filename: string; appGroup: string; }) => Promis
 | **`options`** | <code>{ base64: string; filename: string; appGroup: string; }</code> |
 
 **Returns:** <code>Promise&lt;{ path: string; }&gt;</code>
+
+--------------------
+
+
+### delete(...)
+
+```typescript
+delete(options: { filename: string; appGroup: string; }) => Promise<void>
+```
+
+| Param         | Type                                                 |
+| ------------- | ---------------------------------------------------- |
+| **`options`** | <code>{ filename: string; appGroup: string; }</code> |
 
 --------------------
 

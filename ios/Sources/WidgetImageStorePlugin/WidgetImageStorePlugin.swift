@@ -8,7 +8,8 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "WidgetImageStorePlugin"
     public let jsName = "WidgetImageStore"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "save", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "save", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "delete", returnType: CAPPluginReturnPromise),
     ]
     private let implementation = WidgetImageStore()
 
@@ -29,6 +30,22 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             ])
         } else {
             call.reject("Failed to save image")
+        }
+    }
+
+    @objc func delete(_ call: CAPPluginCall) {
+        let filename = call.getString("filename") ?? ""
+        let appGroup = call.getString("appGroup") ?? ""
+
+        guard !filename.isEmpty && !appGroup.isEmpty else {
+            call.reject("Filename and App Group are required")
+            return
+        }
+
+        if implementation.deleteImage(filename, appGroup: appGroup) {
+            call.resolve()
+        } else {
+            call.reject("Failed to delete image")
         }
     }
 

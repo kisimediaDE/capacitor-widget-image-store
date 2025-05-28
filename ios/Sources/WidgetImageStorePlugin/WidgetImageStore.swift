@@ -32,4 +32,25 @@ import Foundation
             return nil
         }
     }
+
+    @objc public func deleteImage(_ filename: String, appGroup: String) -> Bool {
+        guard
+            let url = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: appGroup)
+        else {
+            print("❌ App Group Container URL not found")
+            return false
+        }
+
+        let path = url.appendingPathComponent(filename)
+
+        do {
+            try FileManager.default.removeItem(at: path)
+            return true
+        } catch {
+            print("❌ Delete failed:", error)
+            return false
+        }
+    }
+
 }
