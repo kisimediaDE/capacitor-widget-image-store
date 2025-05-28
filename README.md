@@ -24,12 +24,12 @@ npx cap sync
 ### save(...)
 
 ```typescript
-save(options: { base64: string; filename: string; appGroup: string; }) => Promise<{ path: string; }>
+save(options: { base64: string; filename: string; appGroup: string; resize?: boolean; }) => Promise<{ path: string; }>
 ```
 
-| Param         | Type                                                                 |
-| ------------- | -------------------------------------------------------------------- |
-| **`options`** | <code>{ base64: string; filename: string; appGroup: string; }</code> |
+| Param         | Type                                                                                   |
+| ------------- | -------------------------------------------------------------------------------------- |
+| **`options`** | <code>{ base64: string; filename: string; appGroup: string; resize?: boolean; }</code> |
 
 **Returns:** <code>Promise&lt;{ path: string; }&gt;</code>
 

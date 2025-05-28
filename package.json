@@ -1,6 +1,6 @@
 {
   "name": "capacitor-widget-image-store",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Save base64 images to shared App Group container",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -17,10 +17,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kisimedia/capacitor-widget-image-store.git"
+    "url": "git+https://github.com/kisimediade/capacitor-widget-image-store.git"
   },
   "bugs": {
-    "url": "https://github.com/kisimedia/capacitor-widget-image-store/issues"
+    "url": "https://github.com/kisimediade/capacitor-widget-image-store/issues"
   },
   "keywords": [
     "capacitor",

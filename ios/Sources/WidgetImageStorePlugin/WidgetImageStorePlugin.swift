@@ -13,23 +13,48 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
     ]
     private let implementation = WidgetImageStore()
 
-    @objc func save(_ call: CAPPluginCall) {
-        let base64 = call.getString("base64") ?? ""
-        let filename = call.getString("filename") ?? "image.jpg"
-        let appGroup = call.getString("appGroup") ?? ""
-
-        guard !appGroup.isEmpty else {
-            call.reject("App Group is required")
+    @objc public func save(_ call: CAPPluginCall) {
+        guard let base64 = call.getString("base64"),
+            let filename = call.getString("filename"),
+            let appGroup = call.getString("appGroup")
+        else {
+            call.reject("Missing parameters")
             return
         }
 
-        if let path = implementation.saveBase64Image(base64, filename: filename, appGroup: appGroup)
-        {
-            call.resolve([
-                "path": path
-            ])
-        } else {
-            call.reject("Failed to save image")
+        let shouldResize = call.getBool("resize") ?? false
+
+        guard let data = Data(base64Encoded: base64),
+            var image = UIImage(data: data)
+        else {
+            call.reject("Image decoding failed")
+            return
+        }
+
+        if shouldResize {
+            let maxSize: CGFloat = 1024
+            let scale = min(maxSize / image.size.width, maxSize / image.size.height, 1.0)
+            let newSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+
+            UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+            image = UIGraphicsGetImageFromCurrentImageContext() ?? image
+            UIGraphicsEndImageContext()
+        }
+
+        guard let jpgData = image.jpegData(compressionQuality: 0.85) else {
+            call.reject("Image conversion failed")
+            return
+        }
+
+        let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup)
+        let fileURL = dir?.appendingPathComponent(filename)
+
+        do {
+            try jpgData.write(to: fileURL!)
+            call.resolve(["path": fileURL!.path])
+        } catch {
+            call.reject("File write error: \(error.localizedDescription)")
         }
     }
 
