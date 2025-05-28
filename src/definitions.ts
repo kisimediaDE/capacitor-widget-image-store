@@ -1,3 +1,3 @@
 export interface WidgetImageStorePlugin {
-  echo(options: { value: string }): Promise<{ value: string }>;
+  save(options: { base64: string; filename: string; appGroup: string }): Promise<{ path: string }>;
 }
