@@ -24,7 +24,10 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
 
         let shouldResize = call.getBool("resize") ?? false
 
-        guard let data = Data(base64Encoded: base64),
+        let base64Clean = base64.replacingOccurrences(
+            of: "^data:image/[^;]+;base64,", with: "", options: .regularExpression)
+
+        guard let data = Data(base64Encoded: base64Clean),
             var image = UIImage(data: data)
         else {
             call.reject("Image decoding failed")
