@@ -1,26 +1,116 @@
-<!doctype html>
-<html lang="en" dir="ltr" class="hydrated">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Example Capacitor App</title>
-    <meta
-      name="viewport"
-      content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <meta name="format-detection" content="telephone=no" />
-  </head>
-  <body>
-    <main>
-      <h1>Capacitor Test Plugin Project</h1>
-      <p>
-        This project can be used to test out the functionality of your plugin. Nothing in the
-        <em>example-app/</em> folder will be published to npm when using this template, so you can create away!
-      </p>
-      <label for="echoInput">Echo Text:</label>
-      <input type="text" id="echoInput" name="echoInput" value="Hello World!" />
-      <button onclick="testEcho()">Click Me!</button>
-    </main>
+<!DOCTYPE html>
+<html lang="en">
 
-    <script src="./js/example.js" type="module"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Widget Image Store Tester</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: env(safe-area-inset-top, 2rem) env(safe-area-inset-right, 2rem) env(safe-area-inset-bottom, 2rem) env(safe-area-inset-left, 2rem);
+      box-sizing: border-box;
+      margin: 0;
+      background: #f5f7fa;
+      color: #333;
+      max-width: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ef7c00;
+    }
+
+    .container {
+      max-width: 500px;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0 auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      margin-top: 0.25rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+    }
+
+    button {
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 6px;
+      background: #ef7c00;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #d76d00;
+    }
+
+    .result {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      background: #eef3f7;
+      padding: 0.75rem;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Widget Image Store</h1>
+    <label for="filename">Filename:</label>
+    <input type="text" id="filename" value="testwidget.jpg" />
+
+    <label for="base64">Base64 Image:</label>
+    <textarea id="base64"></textarea>
+
+    <label><input type="checkbox" id="resize" /> Resize Image (max 1024px)</label>
+
+    <button onclick="saveImage()">Save Image</button>
+    <button onclick="deleteImage()" style="background: #717776; margin-top: 0.5rem">Delete Image</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script src="./js/example.js" type="module"></script>
+</body>
+
 </html>

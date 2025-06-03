@@ -13,14 +13,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^7.2.0",
     "@capacitor/core": "latest",
-    "capacitor-widget-image-store": "file:..",
-    "@capacitor/ios": "7.0.0",
-    "@capacitor/android": "7.0.0"
+    "@capacitor/ios": "^7.2.0",
+    "capacitor-widget-image-store": "file:.."
   },
   "devDependencies": {
     "@capacitor/cli": "latest",
-    "vite": "^5.4.2"
+    "vite": "^6.3.5"
   },
   "author": "",
   "license": "ISC"
