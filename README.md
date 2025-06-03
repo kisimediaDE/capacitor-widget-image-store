@@ -1,22 +1,54 @@
-# capacitor-widget-image-store
+# 🖼️ capacitor-widget-image-store
 
-Save base64 images to shared App Group container (iOS) or app-private storage (Android).  
-Supports optional resizing and JPEG compression.
+[![npm](https://img.shields.io/npm/v/capacitor-widget-image-store)](https://www.npmjs.com/package/capacitor-widget-image-store)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/capacitor-widget-image-store)](https://bundlephobia.com/result?p=capacitor-widget-image-store)
+[![License: MIT](https://img.shields.io/npm/l/capacitor-widget-image-store)](./LICENSE)
+[![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20Android-orange)](#-platform-behavior)
+[![Capacitor](https://img.shields.io/badge/capacitor-7.x-blue)](https://capacitorjs.com/)
 
-## Install
+A lightweight Capacitor plugin to **save**, **delete**, and **list** base64-encoded images in a shared app container — perfect for widget integrations on iOS and Android.
+
+Supports:
+
+✅ iOS (App Group container)  
+✅ Android (internal file storage)  
+✅ Resize on save (optional)  
+✅ Cleanup helpers like `deleteExcept` and `exists`
+
+---
+
+## 🚀 Install
 
 ```bash
 npm install capacitor-widget-image-store
 npx cap sync
 ```
 
-## Platform Behavior
+## 📱 Platform Behavior
 
-On **iOS**, images are saved in the specified App Group container, which allows sharing data with widgets or other extensions.
+### iOS
 
-On **Android**, images are stored in the app’s internal storage (`getFilesDir()`), private to the app by default.
+- Uses FileManager.default.containerURL(forSecurityApplicationGroupIdentifier:)
+- Only image files (.jpg, .jpeg, .png, .webp) are listed or deleted
+- Non-image metadata is automatically filtered from list()
+- appGroup is required
 
-## API
+### Android
+
+- Uses internal app files directory via getContext().getFilesDir()
+- Ignores appGroup
+- Same image file filtering applies
+
+## 💡 Why this plugin?
+
+Native widgets require local image file paths, not base64 strings. This plugin bridges the gap by storing base64-encoded images as accessible files — great for:
+
+- iOS Widgets (via App Group)
+- Android Widgets
+- Local image caching for offline use
+- Shared asset cleanup via deleteExcept
+
+## 📘 API
 
 <docgen-index>
 
@@ -24,6 +56,8 @@ On **Android**, images are stored in the app’s internal storage (`getFilesDir(
 * [`delete(...)`](#delete)
 * [`deleteExcept(...)`](#deleteexcept)
 * [`list(...)`](#list)
+* [`exists(...)`](#exists)
+* [`getPath(...)`](#getpath)
 * [Interfaces](#interfaces)
 
 </docgen-index>
@@ -53,14 +87,14 @@ Saves a base64 image to storage.
 ### delete(...)
 
 ```typescript
-delete(options: WidgetImageStoreDeleteOptions) => Promise<void>
+delete(options: WidgetImageStoreFileOptions) => Promise<void>
 ```
 
 Deletes a previously saved image.
 
-| Param         | Type                                                                                    |
-| ------------- | --------------------------------------------------------------------------------------- |
-| **`options`** | <code><a href="#widgetimagestoredeleteoptions">WidgetImageStoreDeleteOptions</a></code> |
+| Param         | Type                                                                                |
+| ------------- | ----------------------------------------------------------------------------------- |
+| **`options`** | <code><a href="#widgetimagestorefileoptions">WidgetImageStoreFileOptions</a></code> |
 
 --------------------
 
@@ -99,6 +133,40 @@ Lists all saved image filenames.
 --------------------
 
 
+### exists(...)
+
+```typescript
+exists(options: WidgetImageStoreFileOptions) => Promise<{ exists: boolean; }>
+```
+
+Checks if the given image exists.
+
+| Param         | Type                                                                                |
+| ------------- | ----------------------------------------------------------------------------------- |
+| **`options`** | <code><a href="#widgetimagestorefileoptions">WidgetImageStoreFileOptions</a></code> |
+
+**Returns:** <code>Promise&lt;{ exists: boolean; }&gt;</code>
+
+--------------------
+
+
+### getPath(...)
+
+```typescript
+getPath(options: WidgetImageStoreFileOptions) => Promise<{ path: string; }>
+```
+
+Returns the full path to the image file.
+
+| Param         | Type                                                                                |
+| ------------- | ----------------------------------------------------------------------------------- |
+| **`options`** | <code><a href="#widgetimagestorefileoptions">WidgetImageStoreFileOptions</a></code> |
+
+**Returns:** <code>Promise&lt;{ path: string; }&gt;</code>
+
+--------------------
+
+
 ### Interfaces
 
 
@@ -114,7 +182,7 @@ Options for saving an image to storage.
 | **`resize`**   | <code>boolean</code> | Whether to resize image to max 1024px before saving (optional) |
 
 
-#### WidgetImageStoreDeleteOptions
+#### WidgetImageStoreFileOptions
 
 Options for deleting an image.
 

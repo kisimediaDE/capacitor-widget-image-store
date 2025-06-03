@@ -74,4 +74,30 @@ public class WidgetImageStorePlugin extends Plugin {
         result.put("files", JSArray.from(files));
         call.resolve(result);
     }
+
+    @PluginMethod
+    public void exists(PluginCall call) {
+        String filename = call.getString("filename");
+        if (filename == null) {
+            call.reject("Filename is required");
+            return;
+        }
+        boolean exists = implementation .imageExists(getContext(), filename);
+        JSObject result = new JSObject();
+        result.put("exists", exists);
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void getPath(PluginCall call) {
+        String filename = call.getString("filename");
+        if (filename == null) {
+            call.reject("Filename is required");
+            return;
+        }
+        String path = implementation.getImagePath(getContext(), filename);
+        JSObject result = new JSObject();
+        result.put("path", path);
+        call.resolve(result);
+    }
 }

@@ -115,4 +115,25 @@ import Foundation
         }
     }
 
+    @objc public func imageExists(filename: String, appGroup: String) -> Bool {
+        guard
+            let url = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: appGroup)
+        else {
+            return false
+        }
+        let fileURL = url.appendingPathComponent(filename)
+        return FileManager.default.fileExists(atPath: fileURL.path)
+    }
+
+    @objc public func imagePath(filename: String, appGroup: String) -> String? {
+        guard
+            let url = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: appGroup)
+        else {
+            return nil
+        }
+        return url.appendingPathComponent(filename).path
+    }
+
 }

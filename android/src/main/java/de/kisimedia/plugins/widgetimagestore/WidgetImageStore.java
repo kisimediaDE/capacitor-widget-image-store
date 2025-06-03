@@ -87,4 +87,13 @@ public class WidgetImageStore {
                          || name.toLowerCase().endsWith(".webp"))
             .toArray(String[]::new);
     }
+
+    public boolean imageExists(Context context, String filename) {
+        File file = new File(context.getFilesDir(), filename);
+        return file.exists();
+    }
+    
+    public String getImagePath(Context context, String filename) {
+        return new File(context.getFilesDir(), filename).getAbsolutePath();
+    }
 }

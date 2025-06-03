@@ -12,6 +12,8 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "delete", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "deleteExcept", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "list", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "exists", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getPath", returnType: CAPPluginReturnPromise),
     ]
     private let implementation = WidgetImageStore()
 
@@ -99,5 +101,27 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
 
         let files = implementation.listImages(appGroup: appGroup)
         call.resolve(["files": files])
+    }
+
+    @objc public func exists(_ call: CAPPluginCall) {
+        guard let filename = call.getString("filename"),
+            let appGroup = call.getString("appGroup")
+        else {
+            call.reject("Missing parameters")
+            return
+        }
+        let exists = implementation.imageExists(filename: filename, appGroup: appGroup)
+        call.resolve(["exists": exists])
+    }
+
+    @objc public func getPath(_ call: CAPPluginCall) {
+        guard let filename = call.getString("filename"),
+            let appGroup = call.getString("appGroup"),
+            let path = implementation.imagePath(filename: filename, appGroup: appGroup)
+        else {
+            call.reject("Missing parameters or path unavailable")
+            return
+        }
+        call.resolve(["path": path])
     }
 }

@@ -1,7 +1,7 @@
 {
   "name": "capacitor-widget-image-store",
-  "version": "0.0.2",
-  "description": "Save base64 images to shared App Group container",
+  "version": "7.0.0",
+  "description": "Capacitor plugin for saving base64 images in shared containers for use in iOS/Android widgets.",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",

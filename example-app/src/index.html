@@ -104,10 +104,24 @@
 
     <label><input type="checkbox" id="resize" /> Resize Image (max 1024px)</label>
 
-    <button onclick="saveImage()">Save Image</button>
-    <button onclick="deleteImage()" style="background: #717776; margin-top: 0.5rem">Delete Image</button>
-    <button onclick="deleteExceptImages()" style="background: #717776; margin-top: 0.5rem">Delete Except Images</button>
-    <button onclick="listImages()" style="background: green; margin-top: 0.5rem">List Images</button>
+    <button onclick="saveImage()">
+      Save Image
+    </button>
+    <button onclick="deleteImage()" style="background: #717776; margin-top: 0.5rem">
+      Delete Image
+    </button>
+    <button onclick="deleteExceptImages()" style="background: #717776; margin-top: 0.5rem">
+      Delete Except Images
+    </button>
+    <button onclick="listImages()" style="background: green; margin-top: 0.5rem">
+      List Images
+    </button>
+    <button onclick="existsImage()" style="background: #444; margin-top: 0.5rem">
+      Check if File Exists
+    </button>
+    <button onclick="getImagePath()" style="background: #444; margin-top: 0.5rem">
+      Get File Path
+    </button>
 
     <div class="result" id="result"></div>
   </div>

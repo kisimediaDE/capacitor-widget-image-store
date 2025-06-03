@@ -11,7 +11,7 @@ export interface WidgetImageStorePlugin {
   /**
    * Deletes a previously saved image.
    */
-  delete(options: WidgetImageStoreDeleteOptions): Promise<void>;
+  delete(options: WidgetImageStoreFileOptions): Promise<void>;
 
   /**
    * Deletes all images from storage except for the ones explicitly listed in `keep`.
@@ -25,6 +25,18 @@ export interface WidgetImageStorePlugin {
    * @returns A list of filenames
    */
   list(options: WidgetImageStoreListOptions): Promise<{ files: string[] }>;
+
+  /**
+   * Checks if the given image exists.
+   * @returns True if file exists
+   */
+  exists(options: WidgetImageStoreFileOptions): Promise<{ exists: boolean }>;
+
+  /**
+   * Returns the full path to the image file.
+   * @returns The absolute file path
+   */
+  getPath(options: WidgetImageStoreFileOptions): Promise<{ path: string }>;
 }
 
 /**
@@ -47,7 +59,7 @@ export interface WidgetImageStoreSaveOptions {
 /**
  * Options for deleting an image.
  */
-export interface WidgetImageStoreDeleteOptions {
+export interface WidgetImageStoreFileOptions {
   /** Filename of the image to delete */
   filename: string;
 

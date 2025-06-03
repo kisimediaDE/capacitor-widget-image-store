@@ -52,3 +52,27 @@ window.listImages = async () => {
     resultBox.textContent = `❌ Error: ${err.message}`;
   }
 };
+
+window.existsImage = async () => {
+  const filename = document.getElementById('filename').value;
+
+  try {
+    const result = await WidgetImageStore.exists({ filename, appGroup });
+    resultBox.textContent = result.exists
+      ? `✅ File exists: ${filename}`
+      : `❌ File does NOT exist: ${filename}`;
+  } catch (err) {
+    resultBox.textContent = `❌ Error: ${err.message}`;
+  }
+};
+
+window.getImagePath = async () => {
+  const filename = document.getElementById('filename').value;
+
+  try {
+    const result = await WidgetImageStore.getPath({ filename, appGroup });
+    resultBox.textContent = `📍 Path: ${result.path}`;
+  } catch (err) {
+    resultBox.textContent = `❌ Error: ${err.message}`;
+  }
+};
