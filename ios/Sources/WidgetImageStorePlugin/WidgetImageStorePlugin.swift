@@ -10,6 +10,8 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "save", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "delete", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "deleteExcept", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "list", returnType: CAPPluginReturnPromise),
     ]
     private let implementation = WidgetImageStore()
 
@@ -77,4 +79,25 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
+    @objc public func deleteExcept(_ call: CAPPluginCall) {
+        guard let appGroup = call.getString("appGroup"),
+            let keep = call.getArray("keep") as? [String]
+        else {
+            call.reject("Missing parameters")
+            return
+        }
+
+        implementation.deleteExcept(keep: keep, appGroup: appGroup)
+        call.resolve()
+    }
+
+    @objc public func list(_ call: CAPPluginCall) {
+        guard let appGroup = call.getString("appGroup") else {
+            call.reject("Missing appGroup")
+            return
+        }
+
+        let files = implementation.listImages(appGroup: appGroup)
+        call.resolve(["files": files])
+    }
 }

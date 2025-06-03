@@ -1,10 +1,13 @@
 package de.kisimedia.plugins.widgetimagestore;
 
+import com.getcapacitor.JSArray;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.JSObject;
+
+import org.json.JSONException;
 
 @CapacitorPlugin(name = "WidgetImageStore")
 public class WidgetImageStorePlugin extends Plugin {
@@ -47,5 +50,28 @@ public class WidgetImageStorePlugin extends Plugin {
         } else {
             call.reject("Failed to delete image");
         }
+    }
+
+    @PluginMethod
+    public void deleteExcept(PluginCall call) throws JSONException {
+        JSArray keepArray = call.getArray("keep");
+        String appGroup = call.getString("appGroup");
+
+        if (keepArray == null) {
+            call.reject("Missing 'keep' array");
+            return;
+        }
+
+        String[] keep = keepArray.toList().toArray(new String[0]);
+        implementation.deleteExcept(getContext(), keep);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void list(PluginCall call) {
+        String[] files = implementation.listImages(getContext());
+        JSObject result = new JSObject();
+        result.put("files", JSArray.from(files));
+        call.resolve(result);
     }
 }

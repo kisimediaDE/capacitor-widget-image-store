@@ -8,6 +8,9 @@ import android.util.Base64;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class WidgetImageStore {
 
@@ -49,5 +52,39 @@ public class WidgetImageStore {
     public boolean deleteImage(Context context, String filename) {
         File file = new File(context.getFilesDir(), filename);
         return file.exists() && file.delete();
+    }
+
+    public void deleteExcept(Context context, String[] keep) {
+        File dir = context.getFilesDir();
+        File[] files = dir.listFiles();
+        if (files == null) return;
+    
+        Set<String> keepSet = new HashSet<>(Arrays.asList(keep));
+    
+        for (File file : files) {
+            String name = file.getName().toLowerCase();
+    
+            boolean isImage = name.endsWith(".jpg") || name.endsWith(".jpeg") ||
+                              name.endsWith(".png") || name.endsWith(".webp");
+    
+            if (file.isFile() && isImage && !keepSet.contains(file.getName())) {
+                file.delete();
+            }
+        }
+    }
+
+    public String[] listImages(Context context) {
+        File dir = context.getFilesDir();
+        File[] files = dir.listFiles();
+        if (files == null) return new String[0];
+    
+        return Arrays.stream(files)
+            .filter(File::isFile)
+            .map(File::getName)
+            .filter(name -> name.toLowerCase().endsWith(".jpg")
+                         || name.toLowerCase().endsWith(".jpeg")
+                         || name.toLowerCase().endsWith(".png")
+                         || name.toLowerCase().endsWith(".webp"))
+            .toArray(String[]::new);
     }
 }

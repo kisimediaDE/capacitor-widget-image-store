@@ -53,4 +53,66 @@ import Foundation
         }
     }
 
+    @objc public func deleteExcept(keep: [String], appGroup: String) {
+        guard
+            let url = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: appGroup)
+        else {
+            print("❌ App Group Container URL not found")
+            return
+        }
+
+        do {
+            let contents = try FileManager.default.contentsOfDirectory(
+                at: url, includingPropertiesForKeys: nil)
+
+            for fileURL in contents {
+                let filename = fileURL.lastPathComponent
+
+                if !keep.contains(filename),
+                    !fileURL.hasDirectoryPath,
+                    filename.lowercased().hasSuffix(".jpg")
+                        || filename.lowercased().hasSuffix(".jpeg")
+                        || filename.lowercased().hasSuffix(".png")
+                        || filename.lowercased().hasSuffix(".webp")
+                {
+
+                    try? FileManager.default.removeItem(at: fileURL)
+                }
+            }
+        } catch {
+            print("❌ DeleteExcept failed:", error)
+        }
+    }
+
+    @objc public func listImages(appGroup: String) -> [String] {
+        guard
+            let url = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: appGroup)
+        else {
+            print("❌ App Group Container URL not found")
+            return []
+        }
+
+        do {
+            let contents = try FileManager.default.contentsOfDirectory(
+                at: url, includingPropertiesForKeys: nil)
+            let imageFiles =
+                contents
+                .filter { $0.hasDirectoryPath == false }
+                .filter {
+                    $0.lastPathComponent.lowercased().hasSuffix(".jpg")
+                        || $0.lastPathComponent.lowercased().hasSuffix(".jpeg")
+                        || $0.lastPathComponent.lowercased().hasSuffix(".png")
+                        || $0.lastPathComponent.lowercased().hasSuffix(".webp")
+                }
+                .map { $0.lastPathComponent }
+
+            return imageFiles
+        } catch {
+            print("❌ Failed to list directory:", error)
+            return []
+        }
+    }
+
 }
