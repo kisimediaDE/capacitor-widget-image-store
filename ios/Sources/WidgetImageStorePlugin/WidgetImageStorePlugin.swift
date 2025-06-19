@@ -49,7 +49,7 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             UIGraphicsEndImageContext()
         }
 
-        guard let jpgData = image.jpegData(compressionQuality: 0.85) else {
+        guard let pngData = image.pngData() else {
             call.reject("Image conversion failed")
             return
         }
@@ -58,7 +58,7 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
         let fileURL = dir?.appendingPathComponent(filename)
 
         do {
-            try jpgData.write(to: fileURL!)
+            try pngData.write(to: fileURL!)
             call.resolve(["path": fileURL!.path])
         } catch {
             call.reject("File write error: \(error.localizedDescription)")
