@@ -5,7 +5,7 @@ import Foundation
     @objc public func saveBase64Image(_ base64: String, filename: String, appGroup: String)
         -> String?
     {
-        guard let path = resolveFileURL(filename: filename, appGroup: appGroup) else {
+        guard let path = WidgetImageStorePathGuard.resolveFileURL(filename: filename, appGroup: appGroup) else {
             print("❌ Invalid file path")
             return nil
         }
@@ -29,7 +29,7 @@ import Foundation
     }
 
     @objc public func deleteImage(_ filename: String, appGroup: String) -> Bool {
-        guard let path = resolveFileURL(filename: filename, appGroup: appGroup) else {
+        guard let path = WidgetImageStorePathGuard.resolveFileURL(filename: filename, appGroup: appGroup) else {
             print("❌ Invalid file path")
             return false
         }
@@ -106,41 +106,14 @@ import Foundation
     }
 
     @objc public func imageExists(filename: String, appGroup: String) -> Bool {
-        guard let fileURL = resolveFileURL(filename: filename, appGroup: appGroup) else {
+        guard let fileURL = WidgetImageStorePathGuard.resolveFileURL(filename: filename, appGroup: appGroup) else {
             return false
         }
         return FileManager.default.fileExists(atPath: fileURL.path)
     }
 
     @objc public func imagePath(filename: String, appGroup: String) -> String? {
-        return resolveFileURL(filename: filename, appGroup: appGroup)?.path
-    }
-
-    private func resolveFileURL(filename: String, appGroup: String) -> URL? {
-        guard isSafeFilename(filename) else {
-            return nil
-        }
-        guard
-            let url = FileManager.default.containerURL(
-                forSecurityApplicationGroupIdentifier: appGroup)
-        else {
-            return nil
-        }
-        let containerURL = url.standardizedFileURL
-        let fileURL = containerURL.appendingPathComponent(filename).standardizedFileURL
-        let allowedPrefix = containerURL.path.hasSuffix("/") ? containerURL.path : containerURL.path + "/"
-        guard fileURL.path.hasPrefix(allowedPrefix) else {
-            return nil
-        }
-        return fileURL
-    }
-
-    private func isSafeFilename(_ filename: String) -> Bool {
-        if filename.isEmpty { return false }
-        if filename == "." || filename == ".." { return false }
-        if filename.contains("/") || filename.contains("\\") { return false }
-        if filename.contains("\0") { return false }
-        return filename == (filename as NSString).lastPathComponent
+        return WidgetImageStorePathGuard.resolveFileURL(filename: filename, appGroup: appGroup)?.path
     }
 
 }
