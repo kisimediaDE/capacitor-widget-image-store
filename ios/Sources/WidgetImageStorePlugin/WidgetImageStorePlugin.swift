@@ -73,6 +73,15 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             mimeType: mimeType,
             hasAlpha: imageHasAlpha(image)
         )
+        let fileExtension = (filename as NSString).pathExtension.lowercased()
+        guard isExtensionCompatible(fileExtension, with: format) else {
+            let actualExtension = fileExtension.isEmpty ? "(none)" : fileExtension
+            let expectedExtensions = compatibleExtensions(for: format).joined(separator: "/")
+            call.reject(
+                "Filename extension '\(actualExtension)' does not match resolved format '\(formatName(format))'. Use .\(expectedExtensions)."
+            )
+            return
+        }
 
         guard let encodedData = encodeImage(image, format: format, quality: quality) else {
             call.reject("Image conversion failed")
@@ -230,6 +239,32 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             return true
         default:
             return false
+        }
+    }
+
+    private func compatibleExtensions(for format: ImageFormat) -> [String] {
+        switch format {
+        case .jpeg:
+            return ["jpg", "jpeg"]
+        case .png:
+            return ["png"]
+        case .webp:
+            return ["webp"]
+        }
+    }
+
+    private func isExtensionCompatible(_ fileExtension: String, with format: ImageFormat) -> Bool {
+        return compatibleExtensions(for: format).contains(fileExtension)
+    }
+
+    private func formatName(_ format: ImageFormat) -> String {
+        switch format {
+        case .jpeg:
+            return "jpeg"
+        case .png:
+            return "png"
+        case .webp:
+            return "webp"
         }
     }
 

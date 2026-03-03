@@ -37,7 +37,8 @@ public class WidgetImageStorePlugin extends Plugin {
             ret.put("path", path);
             call.resolve(ret);
         } else {
-            call.reject("Image save failed");
+            String error = implementation.getLastError();
+            call.reject(error != null ? error : "Image save failed");
         }
     }
 

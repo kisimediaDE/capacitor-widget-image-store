@@ -5,14 +5,16 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Base64;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 public class WidgetImageStore {
+
+    private String lastError;
 
     private enum ImageFormat {
         JPEG,
@@ -28,6 +30,7 @@ public class WidgetImageStore {
         String requestedFormat,
         Float requestedQuality
     ) {
+        lastError = null;
         try {
             String cleanBase64 = base64.replaceAll("^data:image/[^;]+;base64,", "");
             byte[] decoded = Base64.decode(cleanBase64, Base64.DEFAULT);
@@ -52,6 +55,20 @@ public class WidgetImageStore {
             }
 
             ImageFormat format = resolveFormat(requestedFormat, filename, mimeType, bitmap.hasAlpha());
+            String fileExtension = extractFileExtension(filename);
+            if (!isExtensionCompatible(fileExtension, format)) {
+                String actualExtension = fileExtension.isEmpty() ? "(none)" : fileExtension;
+                String expectedExtensions = String.join("/", compatibleExtensions(format));
+                lastError =
+                    "Filename extension '" +
+                    actualExtension +
+                    "' does not match resolved format '" +
+                    formatName(format) +
+                    "'. Use ." +
+                    expectedExtensions +
+                    ".";
+                return null;
+            }
             int compressionQuality = Math.round(sanitizeQuality(requestedQuality) * 100f);
 
             File file = new File(context.getFilesDir(), filename);
@@ -62,8 +79,15 @@ public class WidgetImageStore {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            if (lastError == null) {
+                lastError = "Image save failed";
+            }
             return null;
         }
+    }
+
+    public String getLastError() {
+        return lastError;
     }
 
     private Bitmap.CompressFormat resolveCompressFormat(ImageFormat format) {
@@ -168,6 +192,47 @@ public class WidgetImageStore {
             case "jpeg":
             default:
                 return ImageFormat.JPEG;
+        }
+    }
+
+    private String extractFileExtension(String filename) {
+        int lastDot = filename.lastIndexOf('.');
+        if (lastDot >= 0 && lastDot < filename.length() - 1) {
+            return filename.substring(lastDot + 1).toLowerCase(Locale.ROOT);
+        }
+        return "";
+    }
+
+    private boolean isExtensionCompatible(String extension, ImageFormat format) {
+        for (String expectedExtension : compatibleExtensions(format)) {
+            if (expectedExtension.equals(extension)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String[] compatibleExtensions(ImageFormat format) {
+        switch (format) {
+            case PNG:
+                return new String[] { "png" };
+            case WEBP:
+                return new String[] { "webp" };
+            case JPEG:
+            default:
+                return new String[] { "jpg", "jpeg" };
+        }
+    }
+
+    private String formatName(ImageFormat format) {
+        switch (format) {
+            case PNG:
+                return "png";
+            case WEBP:
+                return "webp";
+            case JPEG:
+            default:
+                return "jpeg";
         }
     }
 
