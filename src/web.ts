@@ -1,4 +1,5 @@
 import { WebPlugin } from '@capacitor/core';
+
 import type { WidgetImageStorePlugin } from './definitions';
 
 export class WidgetImageStoreWeb extends WebPlugin implements WidgetImageStorePlugin {
