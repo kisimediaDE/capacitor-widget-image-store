@@ -253,10 +253,11 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
         }
 
         let data = NSMutableData()
+        let webpTypeIdentifier = UTType(filenameExtension: "webp")?.identifier ?? "org.webmproject.webp"
         guard
             let destination = CGImageDestinationCreateWithData(
                 data,
-                UTType.webp.identifier as CFString,
+                webpTypeIdentifier as CFString,
                 1,
                 nil
             )
