@@ -1,7 +1,7 @@
 import Foundation
 
 enum WidgetImageStorePathGuard {
-    enum ResolutionError {
+    enum ResolutionError: Error {
         case invalidFilename
         case appGroupUnavailable
         case invalidPath
