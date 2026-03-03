@@ -58,7 +58,15 @@ public class WidgetImageStore {
             String fileExtension = extractFileExtension(filename);
             if (!isExtensionCompatible(fileExtension, format)) {
                 String actualExtension = fileExtension.isEmpty() ? "(none)" : fileExtension;
-                String expectedExtensions = String.join("/", compatibleExtensions(format));
+                String[] compatible = compatibleExtensions(format);
+                StringBuilder expectedBuilder = new StringBuilder();
+                for (int i = 0; i < compatible.length; i++) {
+                    if (i > 0) {
+                        expectedBuilder.append("/");
+                    }
+                    expectedBuilder.append(compatible[i]);
+                }
+                String expectedExtensions = expectedBuilder.toString();
                 lastError =
                     "Filename extension '" +
                     actualExtension +
