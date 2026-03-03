@@ -6,8 +6,8 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
-import org.json.JSONException;
 import java.util.Locale;
+import org.json.JSONException;
 
 @CapacitorPlugin(name = "WidgetImageStore")
 public class WidgetImageStorePlugin extends Plugin {
