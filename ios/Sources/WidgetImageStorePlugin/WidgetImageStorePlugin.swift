@@ -90,13 +90,15 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             hasAlpha: imageHasAlpha(image)
         )
         let fileExtension = (filename as NSString).pathExtension.lowercased()
-        guard isExtensionCompatible(fileExtension, with: format) else {
-            let actualExtension = fileExtension.isEmpty ? "(none)" : fileExtension
-            let expectedExtensions = compatibleExtensions(for: format).joined(separator: "/")
-            call.reject(
-                "Filename extension '\(actualExtension)' does not match resolved format '\(formatName(format))'. Use .\(expectedExtensions)."
-            )
-            return
+        if !fileExtension.isEmpty {
+            guard isExtensionCompatible(fileExtension, with: format) else {
+                let actualExtension = fileExtension.isEmpty ? "(none)" : fileExtension
+                let expectedExtensions = compatibleExtensions(for: format).joined(separator: "/")
+                call.reject(
+                    "Filename extension '\(actualExtension)' does not match resolved format '\(formatName(format))'. Use .\(expectedExtensions)."
+                )
+                return
+            }
         }
 
         guard let encodedData = encodeImage(image, format: format, quality: quality) else {

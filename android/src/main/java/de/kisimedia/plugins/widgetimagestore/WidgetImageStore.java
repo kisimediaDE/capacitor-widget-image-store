@@ -57,26 +57,28 @@ public class WidgetImageStore {
 
             ImageFormat format = resolveFormat(requestedFormat, filename, mimeType, bitmap.hasAlpha());
             String fileExtension = extractFileExtension(filename);
-            if (!isExtensionCompatible(fileExtension, format)) {
-                String actualExtension = fileExtension.isEmpty() ? "(none)" : fileExtension;
-                String[] compatible = compatibleExtensions(format);
-                StringBuilder expectedBuilder = new StringBuilder();
-                for (int i = 0; i < compatible.length; i++) {
-                    if (i > 0) {
-                        expectedBuilder.append("/");
+            if (!fileExtension.isEmpty()) {
+                if (!isExtensionCompatible(fileExtension, format)) {
+                    String actualExtension = fileExtension.isEmpty() ? "(none)" : fileExtension;
+                    String[] compatible = compatibleExtensions(format);
+                    StringBuilder expectedBuilder = new StringBuilder();
+                    for (int i = 0; i < compatible.length; i++) {
+                        if (i > 0) {
+                            expectedBuilder.append("/");
+                        }
+                        expectedBuilder.append(compatible[i]);
                     }
-                    expectedBuilder.append(compatible[i]);
+                    String expectedExtensions = expectedBuilder.toString();
+                    lastError =
+                        "Filename extension '" +
+                        actualExtension +
+                        "' does not match resolved format '" +
+                        formatName(format) +
+                        "'. Use ." +
+                        expectedExtensions +
+                        ".";
+                    return null;
                 }
-                String expectedExtensions = expectedBuilder.toString();
-                lastError =
-                    "Filename extension '" +
-                    actualExtension +
-                    "' does not match resolved format '" +
-                    formatName(format) +
-                    "'. Use ." +
-                    expectedExtensions +
-                    ".";
-                return null;
             }
             int compressionQuality = Math.round(sanitizeQuality(requestedQuality) * 100f);
 
