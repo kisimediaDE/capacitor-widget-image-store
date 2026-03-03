@@ -19,13 +19,15 @@ public class WidgetImageStorePlugin extends Plugin {
         String base64 = call.getString("base64");
         String filename = call.getString("filename");
         boolean resize = call.getBoolean("resize", false);
+        String format = call.getString("format");
+        Float quality = call.getFloat("quality");
 
         if (base64 == null || filename == null) {
             call.reject("Missing parameters");
             return;
         }
 
-        String path = implementation.saveBase64Image(getContext(), base64, filename, resize);
+        String path = implementation.saveBase64Image(getContext(), base64, filename, resize, format, quality);
         if (path != null) {
             JSObject ret = new JSObject();
             ret.put("path", path);

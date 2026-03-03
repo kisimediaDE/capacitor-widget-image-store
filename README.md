@@ -59,6 +59,7 @@ Native widgets require local image file paths, not base64 strings. This plugin b
 * [`exists(...)`](#exists)
 * [`getPath(...)`](#getpath)
 * [Interfaces](#interfaces)
+* [Type Aliases](#type-aliases)
 
 </docgen-index>
 
@@ -174,12 +175,14 @@ Returns the full path to the image file.
 
 Options for saving an image to storage.
 
-| Prop           | Type                 | Description                                                    |
-| -------------- | -------------------- | -------------------------------------------------------------- |
-| **`base64`**   | <code>string</code>  | Base64 encoded image string, optionally with data URL prefix   |
-| **`filename`** | <code>string</code>  | Filename to store the image under (e.g. `example.jpg`)         |
-| **`appGroup`** | <code>string</code>  | App Group ID (iOS), ignored on Android                         |
-| **`resize`**   | <code>boolean</code> | Whether to resize image to max 1024px before saving (optional) |
+| Prop           | Type                                                                                | Description                                                                                                                                                                      |
+| -------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`base64`**   | <code>string</code>                                                                 | Base64 encoded image string, optionally with data URL prefix                                                                                                                     |
+| **`filename`** | <code>string</code>                                                                 | Filename to store the image under (e.g. `example.jpg`)                                                                                                                           |
+| **`appGroup`** | <code>string</code>                                                                 | App Group ID (iOS), ignored on Android                                                                                                                                           |
+| **`resize`**   | <code>boolean</code>                                                                | Whether to resize image to max 1024px before saving (optional)                                                                                                                   |
+| **`format`**   | <code><a href="#widgetimagestoreimageformat">WidgetImageStoreImageFormat</a></code> | Output format strategy. - `auto`: chooses based on explicit source type when available and preserves alpha when needed - `jpeg` / `jpg`, `png`, `webp`: forces a concrete format |
+| **`quality`**  | <code>number</code>                                                                 | Compression quality between 0 and 1. Used by lossy formats (`jpeg` and lossy `webp`), ignored by `png`. Defaults to `0.85`.                                                      |
 
 
 #### WidgetImageStoreFileOptions
@@ -209,5 +212,13 @@ Options for listing all saved images.
 | Prop           | Type                | Description                            |
 | -------------- | ------------------- | -------------------------------------- |
 | **`appGroup`** | <code>string</code> | App Group ID (iOS), ignored on Android |
+
+
+### Type Aliases
+
+
+#### WidgetImageStoreImageFormat
+
+<code>'auto' | 'jpeg' | 'jpg' | 'png' | 'webp'</code>
 
 </docgen-api>

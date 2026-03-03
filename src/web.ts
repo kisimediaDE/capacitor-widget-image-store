@@ -1,8 +1,8 @@
 import { WebPlugin } from '@capacitor/core';
-import type { WidgetImageStorePlugin } from './definitions';
+import type { WidgetImageStorePlugin, WidgetImageStoreSaveOptions } from './definitions';
 
 export class WidgetImageStoreWeb extends WebPlugin implements WidgetImageStorePlugin {
-  async save(_options: { base64: string; filename: string; appGroup: string }): Promise<{ path: string }> {
+  async save(_options: WidgetImageStoreSaveOptions): Promise<{ path: string }> {
     throw this.unimplemented('save is not implemented on web.');
   }
 
