@@ -85,7 +85,11 @@ public class WidgetImageStore {
         if (quality == null) {
             return 0.85f;
         }
-        return Math.max(0f, Math.min(quality, 1f));
+        float q = quality;
+        if (Float.isNaN(q) || Float.isInfinite(q)) {
+            return 0.85f;
+        }
+        return Math.max(0f, Math.min(q, 1f));
     }
 
     private String extractMimeType(String base64) {
