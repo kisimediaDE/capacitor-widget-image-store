@@ -130,7 +130,7 @@ public class WidgetImageStore {
             return null;
         }
 
-        String prefix = parts[0].toLowerCase();
+        String prefix = parts[0].toLowerCase(Locale.ROOT);
         if (!prefix.startsWith("data:image/") || !prefix.contains(";base64")) {
             return null;
         }
@@ -153,7 +153,7 @@ public class WidgetImageStore {
         String extension = "";
         int lastDot = filename.lastIndexOf('.');
         if (lastDot >= 0 && lastDot < filename.length() - 1) {
-            extension = filename.substring(lastDot + 1).toLowerCase();
+            extension = filename.substring(lastDot + 1).toLowerCase(Locale.ROOT);
         }
 
         String preferred = normalizeFormat(mimeType);
@@ -176,7 +176,7 @@ public class WidgetImageStore {
             return null;
         }
 
-        switch (value.toLowerCase()) {
+        switch (value.toLowerCase(Locale.ROOT)) {
             case "auto":
                 return "auto";
             case "jpg":
@@ -257,7 +257,7 @@ public class WidgetImageStore {
         Set<String> keepSet = new HashSet<>(Arrays.asList(keep));
 
         for (File file : files) {
-            String name = file.getName().toLowerCase();
+            String name = file.getName().toLowerCase(Locale.ROOT);
 
             boolean isImage = name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp");
 
@@ -275,13 +275,12 @@ public class WidgetImageStore {
         return Arrays.stream(files)
             .filter(File::isFile)
             .map(File::getName)
-            .filter(
-                (name) ->
-                    name.toLowerCase().endsWith(".jpg") ||
-                    name.toLowerCase().endsWith(".jpeg") ||
-                    name.toLowerCase().endsWith(".png") ||
-                    name.toLowerCase().endsWith(".webp")
-            )
+            .filter((name) -> {
+                String nameLower = name.toLowerCase(Locale.ROOT);
+                return (
+                    nameLower.endsWith(".jpg") || nameLower.endsWith(".jpeg") || nameLower.endsWith(".png") || nameLower.endsWith(".webp")
+                );
+            })
             .toArray(String[]::new);
     }
 
