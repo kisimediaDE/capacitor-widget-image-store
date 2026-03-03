@@ -36,7 +36,10 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
 
         let shouldResize = call.getBool("resize") ?? false
         let requestedFormat = call.getString("format")
-        let quality = max(0.0, min(call.getDouble("quality") ?? 0.85, 1.0))
+        let requestedQuality = call.getDouble("quality") ?? 0.85
+        let quality = requestedQuality.isFinite
+            ? max(0.0, min(requestedQuality, 1.0))
+            : 0.85
 
         let base64Clean = base64.replacingOccurrences(
             of: "^data:image/[^;]+;base64,", with: "", options: .regularExpression)
