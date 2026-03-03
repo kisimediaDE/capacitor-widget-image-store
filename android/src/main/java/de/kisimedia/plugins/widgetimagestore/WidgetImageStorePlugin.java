@@ -1,12 +1,11 @@
 package de.kisimedia.plugins.widgetimagestore;
 
 import com.getcapacitor.JSArray;
+import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
-import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.PluginMethod;
-import com.getcapacitor.JSObject;
-
+import com.getcapacitor.annotation.CapacitorPlugin;
 import org.json.JSONException;
 
 @CapacitorPlugin(name = "WidgetImageStore")
@@ -84,7 +83,7 @@ public class WidgetImageStorePlugin extends Plugin {
             call.reject("Filename is required");
             return;
         }
-        boolean exists = implementation .imageExists(getContext(), filename);
+        boolean exists = implementation.imageExists(getContext(), filename);
         JSObject result = new JSObject();
         result.put("exists", exists);
         call.resolve(result);

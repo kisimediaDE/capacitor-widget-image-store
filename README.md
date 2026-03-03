@@ -4,7 +4,7 @@
 [![bundle size](https://img.shields.io/bundlephobia/minzip/capacitor-widget-image-store)](https://bundlephobia.com/result?p=capacitor-widget-image-store)
 [![License: MIT](https://img.shields.io/npm/l/capacitor-widget-image-store)](./LICENSE)
 [![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20Android-orange)](#-platform-behavior)
-[![Capacitor](https://img.shields.io/badge/capacitor-7.x-blue)](https://capacitorjs.com/)
+[![Capacitor](https://img.shields.io/badge/capacitor-8.x-blue)](https://capacitorjs.com/)
 
 A lightweight Capacitor plugin to **save**, **delete**, and **list** base64-encoded images in a shared app container — perfect for widget integrations on iOS and Android.
 
@@ -82,8 +82,7 @@ Saves a base64 image to storage.
 
 **Returns:** <code>Promise&lt;{ path: string; }&gt;</code>
 
---------------------
-
+---
 
 ### delete(...)
 
@@ -97,8 +96,7 @@ Deletes a previously saved image.
 | ------------- | ----------------------------------------------------------------------------------- |
 | **`options`** | <code><a href="#widgetimagestorefileoptions">WidgetImageStoreFileOptions</a></code> |
 
---------------------
-
+---
 
 ### deleteExcept(...)
 
@@ -114,8 +112,7 @@ This is useful for cleaning up unused images after refreshing or regenerating wi
 | ------------- | --------------------------------------------------------------------------------------------------- |
 | **`options`** | <code><a href="#widgetimagestoredeleteexceptoptions">WidgetImageStoreDeleteExceptOptions</a></code> |
 
---------------------
-
+---
 
 ### list(...)
 
@@ -131,8 +128,7 @@ Lists all saved image filenames.
 
 **Returns:** <code>Promise&lt;{ files: string[]; }&gt;</code>
 
---------------------
-
+---
 
 ### exists(...)
 
@@ -148,8 +144,7 @@ Checks if the given image exists.
 
 **Returns:** <code>Promise&lt;{ exists: boolean; }&gt;</code>
 
---------------------
-
+---
 
 ### getPath(...)
 
@@ -165,11 +160,9 @@ Returns the full path to the image file.
 
 **Returns:** <code>Promise&lt;{ path: string; }&gt;</code>
 
---------------------
-
+---
 
 ### Interfaces
-
 
 #### WidgetImageStoreSaveOptions
 
@@ -184,7 +177,6 @@ Options for saving an image to storage.
 | **`format`**   | <code><a href="#widgetimagestoreimageformat">WidgetImageStoreImageFormat</a></code> | Output format strategy. - `auto`: chooses based on explicit source type when available and preserves alpha when needed - `jpeg` / `jpg`, `png`, `webp`: forces a concrete format |
 | **`quality`**  | <code>number</code>                                                                 | Compression quality between 0 and 1. Used by lossy formats (`jpeg` and lossy `webp`), ignored by `png`. Defaults to `0.85`.                                                      |
 
-
 #### WidgetImageStoreFileOptions
 
 Options for deleting an image.
@@ -194,7 +186,6 @@ Options for deleting an image.
 | **`filename`** | <code>string</code> | Filename of the image to delete        |
 | **`appGroup`** | <code>string</code> | App Group ID (iOS), ignored on Android |
 
-
 #### WidgetImageStoreDeleteExceptOptions
 
 Options for deleting all images except specific ones.
@@ -203,7 +194,6 @@ Options for deleting all images except specific ones.
 | -------------- | --------------------- | ------------------------------------------------------------ |
 | **`keep`**     | <code>string[]</code> | List of filenames to keep. All other images will be deleted. |
 | **`appGroup`** | <code>string</code>   | App Group ID (iOS), ignored on Android.                      |
-
 
 #### WidgetImageStoreListOptions
 

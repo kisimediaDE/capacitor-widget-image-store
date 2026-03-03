@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Base64;
-
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Arrays;
@@ -182,8 +182,7 @@ public class WidgetImageStore {
         for (File file : files) {
             String name = file.getName().toLowerCase();
 
-            boolean isImage = name.endsWith(".jpg") || name.endsWith(".jpeg")
-                || name.endsWith(".png") || name.endsWith(".webp");
+            boolean isImage = name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp");
 
             if (file.isFile() && isImage && !keepSet.contains(file.getName())) {
                 file.delete();
@@ -200,10 +199,11 @@ public class WidgetImageStore {
             .filter(File::isFile)
             .map(File::getName)
             .filter(
-                name -> name.toLowerCase().endsWith(".jpg")
-                    || name.toLowerCase().endsWith(".jpeg")
-                    || name.toLowerCase().endsWith(".png")
-                    || name.toLowerCase().endsWith(".webp")
+                (name) ->
+                    name.toLowerCase().endsWith(".jpg") ||
+                    name.toLowerCase().endsWith(".jpeg") ||
+                    name.toLowerCase().endsWith(".png") ||
+                    name.toLowerCase().endsWith(".webp")
             )
             .toArray(String[]::new);
     }
