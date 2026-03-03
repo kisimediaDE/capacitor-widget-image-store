@@ -258,7 +258,7 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     private func imageHasAlpha(_ image: UIImage) -> Bool {
-        guard let alphaInfo = image.cgImage?.alphaInfo else {
+        guard let alphaInfo = resolvedCGImage(from: image)?.alphaInfo else {
             return false
         }
         switch alphaInfo {
@@ -306,18 +306,29 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
         }
     }
 
-    private func webpData(from image: UIImage, quality: Double) -> Data? {
-        let sourceImage: UIImage
-        if image.cgImage == nil {
-            let renderer = UIGraphicsImageRenderer(size: image.size)
-            sourceImage = renderer.image { _ in
-                image.draw(in: CGRect(origin: .zero, size: image.size))
-            }
-        } else {
-            sourceImage = image
+    private func resolvedCGImage(from image: UIImage) -> CGImage? {
+        if let cgImage = image.cgImage {
+            return cgImage
         }
 
-        guard let cgImage = sourceImage.cgImage else {
+        let size = image.size
+        guard size.width > 0, size.height > 0 else {
+            return nil
+        }
+
+        let rendererFormat = UIGraphicsImageRendererFormat.default()
+        rendererFormat.opaque = false
+        rendererFormat.scale = image.scale > 0 ? image.scale : 1.0
+
+        let renderer = UIGraphicsImageRenderer(size: size, format: rendererFormat)
+        let renderedImage = renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
+        return renderedImage.cgImage
+    }
+
+    private func webpData(from image: UIImage, quality: Double) -> Data? {
+        guard let cgImage = resolvedCGImage(from: image) else {
             return nil
         }
 
