@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -42,7 +41,6 @@ public class WidgetImageStore {
                 out.flush();
                 return file.getAbsolutePath();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -58,15 +56,14 @@ public class WidgetImageStore {
         File dir = context.getFilesDir();
         File[] files = dir.listFiles();
         if (files == null) return;
-    
+
         Set<String> keepSet = new HashSet<>(Arrays.asList(keep));
-    
+
         for (File file : files) {
             String name = file.getName().toLowerCase();
-    
-            boolean isImage = name.endsWith(".jpg") || name.endsWith(".jpeg") ||
-                              name.endsWith(".png") || name.endsWith(".webp");
-    
+
+            boolean isImage = name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp");
+
             if (file.isFile() && isImage && !keepSet.contains(file.getName())) {
                 file.delete();
             }
@@ -77,14 +74,17 @@ public class WidgetImageStore {
         File dir = context.getFilesDir();
         File[] files = dir.listFiles();
         if (files == null) return new String[0];
-    
+
         return Arrays.stream(files)
             .filter(File::isFile)
             .map(File::getName)
-            .filter(name -> name.toLowerCase().endsWith(".jpg")
-                         || name.toLowerCase().endsWith(".jpeg")
-                         || name.toLowerCase().endsWith(".png")
-                         || name.toLowerCase().endsWith(".webp"))
+            .filter(
+                (name) ->
+                    name.toLowerCase().endsWith(".jpg") ||
+                    name.toLowerCase().endsWith(".jpeg") ||
+                    name.toLowerCase().endsWith(".png") ||
+                    name.toLowerCase().endsWith(".webp")
+            )
             .toArray(String[]::new);
     }
 
@@ -92,7 +92,7 @@ public class WidgetImageStore {
         File file = new File(context.getFilesDir(), filename);
         return file.exists();
     }
-    
+
     public String getImagePath(Context context, String filename) {
         return new File(context.getFilesDir(), filename).getAbsolutePath();
     }
