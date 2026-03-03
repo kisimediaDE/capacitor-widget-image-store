@@ -56,7 +56,7 @@ public class WidgetImageStore {
 
             File file = new File(context.getFilesDir(), filename);
             try (FileOutputStream out = new FileOutputStream(file)) {
-                bitmap.compress(resolveCompressFormat(format, bitmap.hasAlpha()), compressionQuality, out);
+                bitmap.compress(resolveCompressFormat(format), compressionQuality, out);
                 out.flush();
                 return file.getAbsolutePath();
             }
@@ -66,13 +66,13 @@ public class WidgetImageStore {
         }
     }
 
-    private Bitmap.CompressFormat resolveCompressFormat(ImageFormat format, boolean hasAlpha) {
+    private Bitmap.CompressFormat resolveCompressFormat(ImageFormat format) {
         switch (format) {
             case PNG:
                 return Bitmap.CompressFormat.PNG;
             case WEBP:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    return hasAlpha ? Bitmap.CompressFormat.WEBP_LOSSLESS : Bitmap.CompressFormat.WEBP_LOSSY;
+                    return Bitmap.CompressFormat.WEBP_LOSSY;
                 }
                 return Bitmap.CompressFormat.WEBP;
             case JPEG:
