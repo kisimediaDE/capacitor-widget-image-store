@@ -86,7 +86,11 @@ public class WidgetImageStore {
                 return null;
             }
             try (FileOutputStream out = new FileOutputStream(file)) {
-                bitmap.compress(resolveCompressFormat(format), compressionQuality, out);
+                boolean success = bitmap.compress(resolveCompressFormat(format), compressionQuality, out);
+                if (!success) {
+                    lastError = "Image encoding failed";
+                    return null;
+                }
                 out.flush();
                 return file.getAbsolutePath();
             }
@@ -131,7 +135,7 @@ public class WidgetImageStore {
 
     private String extractMimeType(String base64) {
         String[] parts = base64.split(",", 2);
-        if (parts.length == 0) {
+        if (parts.length < 2) {
             return null;
         }
 
