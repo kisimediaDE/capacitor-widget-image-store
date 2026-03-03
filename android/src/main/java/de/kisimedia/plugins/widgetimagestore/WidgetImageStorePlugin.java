@@ -26,6 +26,10 @@ public class WidgetImageStorePlugin extends Plugin {
             call.reject("Missing parameters");
             return;
         }
+        if (!isSafeFilename(filename)) {
+            call.reject("Invalid filename. Use a plain filename without path separators.");
+            return;
+        }
         if (format != null && !isSupportedFormat(format)) {
             call.reject("Invalid format. Supported values: auto, jpeg, jpg, png, webp");
             return;
@@ -48,6 +52,10 @@ public class WidgetImageStorePlugin extends Plugin {
 
         if (filename == null) {
             call.reject("Filename is required");
+            return;
+        }
+        if (!isSafeFilename(filename)) {
+            call.reject("Invalid filename. Use a plain filename without path separators.");
             return;
         }
 
@@ -89,6 +97,10 @@ public class WidgetImageStorePlugin extends Plugin {
             call.reject("Filename is required");
             return;
         }
+        if (!isSafeFilename(filename)) {
+            call.reject("Invalid filename. Use a plain filename without path separators.");
+            return;
+        }
         boolean exists = implementation.imageExists(getContext(), filename);
         JSObject result = new JSObject();
         result.put("exists", exists);
@@ -102,7 +114,15 @@ public class WidgetImageStorePlugin extends Plugin {
             call.reject("Filename is required");
             return;
         }
+        if (!isSafeFilename(filename)) {
+            call.reject("Invalid filename. Use a plain filename without path separators.");
+            return;
+        }
         String path = implementation.getImagePath(getContext(), filename);
+        if (path == null) {
+            call.reject("Path unavailable");
+            return;
+        }
         JSObject result = new JSObject();
         result.put("path", path);
         call.resolve(result);
@@ -119,5 +139,18 @@ public class WidgetImageStorePlugin extends Plugin {
             default:
                 return false;
         }
+    }
+
+    private boolean isSafeFilename(String filename) {
+        if (filename.isEmpty()) {
+            return false;
+        }
+        if (filename.equals(".") || filename.equals("..")) {
+            return false;
+        }
+        if (filename.contains("/") || filename.contains("\\")) {
+            return false;
+        }
+        return filename.indexOf('\0') == -1;
     }
 }

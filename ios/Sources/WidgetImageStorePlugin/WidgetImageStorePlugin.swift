@@ -33,6 +33,10 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             call.reject("Missing parameters")
             return
         }
+        guard isSafeFilename(filename) else {
+            call.reject("Invalid filename. Use a plain filename without path separators.")
+            return
+        }
 
         let shouldResize = call.getBool("resize") ?? false
         let requestedFormat = call.getString("format")
@@ -92,7 +96,13 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             call.reject("App group container unavailable")
             return
         }
-        let fileURL = dir.appendingPathComponent(filename)
+        let containerURL = dir.standardizedFileURL
+        let fileURL = containerURL.appendingPathComponent(filename).standardizedFileURL
+        let allowedPrefix = containerURL.path.hasSuffix("/") ? containerURL.path : containerURL.path + "/"
+        guard fileURL.path.hasPrefix(allowedPrefix) else {
+            call.reject("Invalid filename path")
+            return
+        }
 
         do {
             try encodedData.write(to: fileURL)
@@ -108,6 +118,10 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
 
         guard !filename.isEmpty && !appGroup.isEmpty else {
             call.reject("Filename and App Group are required")
+            return
+        }
+        guard isSafeFilename(filename) else {
+            call.reject("Invalid filename. Use a plain filename without path separators.")
             return
         }
 
@@ -147,16 +161,27 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             call.reject("Missing parameters")
             return
         }
+        guard isSafeFilename(filename) else {
+            call.reject("Invalid filename. Use a plain filename without path separators.")
+            return
+        }
         let exists = implementation.imageExists(filename: filename, appGroup: appGroup)
         call.resolve(["exists": exists])
     }
 
     @objc public func getPath(_ call: CAPPluginCall) {
         guard let filename = call.getString("filename"),
-            let appGroup = call.getString("appGroup"),
-            let path = implementation.imagePath(filename: filename, appGroup: appGroup)
+            let appGroup = call.getString("appGroup")
         else {
-            call.reject("Missing parameters or path unavailable")
+            call.reject("Missing parameters")
+            return
+        }
+        guard isSafeFilename(filename) else {
+            call.reject("Invalid filename. Use a plain filename without path separators.")
+            return
+        }
+        guard let path = implementation.imagePath(filename: filename, appGroup: appGroup) else {
+            call.reject("Path unavailable")
             return
         }
         call.resolve(["path": path])
@@ -176,6 +201,14 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
         default:
             return nil
         }
+    }
+
+    private func isSafeFilename(_ filename: String) -> Bool {
+        if filename.isEmpty { return false }
+        if filename == "." || filename == ".." { return false }
+        if filename.contains("/") || filename.contains("\\") { return false }
+        if filename.contains("\0") { return false }
+        return filename == (filename as NSString).lastPathComponent
     }
 
     private func formatFromNormalized(_ value: String) -> ImageFormat {

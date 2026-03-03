@@ -5,15 +5,10 @@ import Foundation
     @objc public func saveBase64Image(_ base64: String, filename: String, appGroup: String)
         -> String?
     {
-        guard
-            let url = FileManager.default.containerURL(
-                forSecurityApplicationGroupIdentifier: appGroup)
-        else {
-            print("❌ App Group Container URL not found")
+        guard let path = resolveFileURL(filename: filename, appGroup: appGroup) else {
+            print("❌ Invalid file path")
             return nil
         }
-
-        let path = url.appendingPathComponent(filename)
 
         let base64Clean = base64.replacingOccurrences(
             of: "^data:image/[^;]+;base64,", with: "", options: .regularExpression)
@@ -34,15 +29,10 @@ import Foundation
     }
 
     @objc public func deleteImage(_ filename: String, appGroup: String) -> Bool {
-        guard
-            let url = FileManager.default.containerURL(
-                forSecurityApplicationGroupIdentifier: appGroup)
-        else {
-            print("❌ App Group Container URL not found")
+        guard let path = resolveFileURL(filename: filename, appGroup: appGroup) else {
+            print("❌ Invalid file path")
             return false
         }
-
-        let path = url.appendingPathComponent(filename)
 
         do {
             try FileManager.default.removeItem(at: path)
@@ -116,24 +106,41 @@ import Foundation
     }
 
     @objc public func imageExists(filename: String, appGroup: String) -> Bool {
-        guard
-            let url = FileManager.default.containerURL(
-                forSecurityApplicationGroupIdentifier: appGroup)
-        else {
+        guard let fileURL = resolveFileURL(filename: filename, appGroup: appGroup) else {
             return false
         }
-        let fileURL = url.appendingPathComponent(filename)
         return FileManager.default.fileExists(atPath: fileURL.path)
     }
 
     @objc public func imagePath(filename: String, appGroup: String) -> String? {
+        return resolveFileURL(filename: filename, appGroup: appGroup)?.path
+    }
+
+    private func resolveFileURL(filename: String, appGroup: String) -> URL? {
+        guard isSafeFilename(filename) else {
+            return nil
+        }
         guard
             let url = FileManager.default.containerURL(
                 forSecurityApplicationGroupIdentifier: appGroup)
         else {
             return nil
         }
-        return url.appendingPathComponent(filename).path
+        let containerURL = url.standardizedFileURL
+        let fileURL = containerURL.appendingPathComponent(filename).standardizedFileURL
+        let allowedPrefix = containerURL.path.hasSuffix("/") ? containerURL.path : containerURL.path + "/"
+        guard fileURL.path.hasPrefix(allowedPrefix) else {
+            return nil
+        }
+        return fileURL
+    }
+
+    private func isSafeFilename(_ filename: String) -> Bool {
+        if filename.isEmpty { return false }
+        if filename == "." || filename == ".." { return false }
+        if filename.contains("/") || filename.contains("\\") { return false }
+        if filename.contains("\0") { return false }
+        return filename == (filename as NSString).lastPathComponent
     }
 
 }

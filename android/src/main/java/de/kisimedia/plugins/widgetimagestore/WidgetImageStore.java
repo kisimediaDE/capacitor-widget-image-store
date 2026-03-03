@@ -7,6 +7,7 @@ import android.os.Build;
 import android.util.Base64;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
@@ -79,7 +80,11 @@ public class WidgetImageStore {
             }
             int compressionQuality = Math.round(sanitizeQuality(requestedQuality) * 100f);
 
-            File file = new File(context.getFilesDir(), filename);
+            File file = resolveSafeFile(context, filename);
+            if (file == null) {
+                lastError = "Invalid filename path";
+                return null;
+            }
             try (FileOutputStream out = new FileOutputStream(file)) {
                 bitmap.compress(resolveCompressFormat(format), compressionQuality, out);
                 out.flush();
@@ -245,8 +250,12 @@ public class WidgetImageStore {
     }
 
     public boolean deleteImage(Context context, String filename) {
-        File file = new File(context.getFilesDir(), filename);
-        return file.exists() && file.delete();
+        try {
+            File file = resolveSafeFile(context, filename);
+            return file != null && file.exists() && file.delete();
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public void deleteExcept(Context context, String[] keep) {
@@ -285,11 +294,31 @@ public class WidgetImageStore {
     }
 
     public boolean imageExists(Context context, String filename) {
-        File file = new File(context.getFilesDir(), filename);
-        return file.exists();
+        try {
+            File file = resolveSafeFile(context, filename);
+            return file != null && file.exists();
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public String getImagePath(Context context, String filename) {
-        return new File(context.getFilesDir(), filename).getAbsolutePath();
+        try {
+            File file = resolveSafeFile(context, filename);
+            return file == null ? null : file.getAbsolutePath();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private File resolveSafeFile(Context context, String filename) throws IOException {
+        File baseDir = context.getFilesDir().getCanonicalFile();
+        File targetFile = new File(baseDir, filename).getCanonicalFile();
+        String basePath = baseDir.getPath();
+        String allowedPrefix = basePath.endsWith(File.separator) ? basePath : basePath + File.separator;
+        if (!targetFile.getPath().startsWith(allowedPrefix)) {
+            return null;
+        }
+        return targetFile;
     }
 }
