@@ -36,6 +36,10 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
 
         let shouldResize = call.getBool("resize") ?? false
         let requestedFormat = call.getString("format")
+        if let requestedFormat, normalizeFormat(requestedFormat) == nil {
+            call.reject("Invalid format. Supported values: auto, jpeg, jpg, png, webp")
+            return
+        }
         let requestedQuality = call.getDouble("quality") ?? 0.85
         let quality = requestedQuality.isFinite
             ? max(0.0, min(requestedQuality, 1.0))

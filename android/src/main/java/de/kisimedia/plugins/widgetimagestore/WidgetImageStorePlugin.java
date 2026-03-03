@@ -7,6 +7,7 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import org.json.JSONException;
+import java.util.Locale;
 
 @CapacitorPlugin(name = "WidgetImageStore")
 public class WidgetImageStorePlugin extends Plugin {
@@ -23,6 +24,10 @@ public class WidgetImageStorePlugin extends Plugin {
 
         if (base64 == null || filename == null) {
             call.reject("Missing parameters");
+            return;
+        }
+        if (format != null && !isSupportedFormat(format)) {
+            call.reject("Invalid format. Supported values: auto, jpeg, jpg, png, webp");
             return;
         }
 
@@ -100,5 +105,18 @@ public class WidgetImageStorePlugin extends Plugin {
         JSObject result = new JSObject();
         result.put("path", path);
         call.resolve(result);
+    }
+
+    private boolean isSupportedFormat(String value) {
+        switch (value.toLowerCase(Locale.ROOT)) {
+            case "auto":
+            case "jpeg":
+            case "jpg":
+            case "png":
+            case "webp":
+                return true;
+            default:
+                return false;
+        }
     }
 }
