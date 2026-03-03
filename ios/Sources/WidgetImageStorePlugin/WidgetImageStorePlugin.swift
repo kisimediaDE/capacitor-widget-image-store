@@ -34,8 +34,19 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
 
-        guard let fileURL = WidgetImageStorePathGuard.resolveFileURL(filename: filename, appGroup: appGroup) else {
-            call.reject("Invalid filename or path")
+        let fileURL: URL
+        switch WidgetImageStorePathGuard.resolveFileURLWithReason(filename: filename, appGroup: appGroup) {
+        case .success(let resolvedURL):
+            fileURL = resolvedURL
+        case .failure(let error):
+            switch error {
+            case .invalidFilename:
+                call.reject("Invalid filename or path")
+            case .appGroupUnavailable:
+                call.reject("App group container unavailable. Check appGroup configuration.")
+            case .invalidPath:
+                call.reject("Invalid filename or path")
+            }
             return
         }
 

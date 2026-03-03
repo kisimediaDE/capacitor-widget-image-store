@@ -1,6 +1,12 @@
 import Foundation
 
 enum WidgetImageStorePathGuard {
+    enum ResolutionError {
+        case invalidFilename
+        case appGroupUnavailable
+        case invalidPath
+    }
+
     static func isSafeFilename(_ filename: String) -> Bool {
         if filename.isEmpty { return false }
         if filename == "." || filename == ".." { return false }
@@ -10,15 +16,24 @@ enum WidgetImageStorePathGuard {
     }
 
     static func resolveFileURL(filename: String, appGroup: String) -> URL? {
-        guard isSafeFilename(filename) else {
+        switch resolveFileURLWithReason(filename: filename, appGroup: appGroup) {
+        case .success(let fileURL):
+            return fileURL
+        case .failure:
             return nil
+        }
+    }
+
+    static func resolveFileURLWithReason(filename: String, appGroup: String) -> Result<URL, ResolutionError> {
+        guard isSafeFilename(filename) else {
+            return .failure(.invalidFilename)
         }
 
         guard
             let container = FileManager.default.containerURL(
                 forSecurityApplicationGroupIdentifier: appGroup)
         else {
-            return nil
+            return .failure(.appGroupUnavailable)
         }
 
         let containerURL = container.resolvingSymlinksInPath().standardizedFileURL
@@ -27,16 +42,16 @@ enum WidgetImageStorePathGuard {
 
         let basePath = containerURL.path.hasSuffix("/") ? containerURL.path : containerURL.path + "/"
         guard resolvedURL.path.hasPrefix(basePath) else {
-            return nil
+            return .failure(.invalidPath)
         }
 
         if FileManager.default.fileExists(atPath: fileURL.path),
             let values = try? fileURL.resourceValues(forKeys: [.isSymbolicLinkKey]),
             values.isSymbolicLink == true
         {
-            return nil
+            return .failure(.invalidPath)
         }
 
-        return fileURL
+        return .success(fileURL)
     }
 }
