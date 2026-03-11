@@ -52,13 +52,14 @@ Native widgets require local image file paths, not base64 strings. This plugin b
 
 <docgen-index>
 
-- [`save(...)`](#save)
-- [`delete(...)`](#delete)
-- [`deleteExcept(...)`](#deleteexcept)
-- [`list(...)`](#list)
-- [`exists(...)`](#exists)
-- [`getPath(...)`](#getpath)
-- [Interfaces](#interfaces)
+* [`save(...)`](#save)
+* [`delete(...)`](#delete)
+* [`deleteExcept(...)`](#deleteexcept)
+* [`list(...)`](#list)
+* [`exists(...)`](#exists)
+* [`getPath(...)`](#getpath)
+* [Interfaces](#interfaces)
+* [Type Aliases](#type-aliases)
 
 </docgen-index>
 
@@ -81,7 +82,8 @@ Saves a base64 image to storage.
 
 **Returns:** <code>Promise&lt;{ path: string; }&gt;</code>
 
----
+--------------------
+
 
 ### delete(...)
 
@@ -95,7 +97,8 @@ Deletes a previously saved image.
 | ------------- | ----------------------------------------------------------------------------------- |
 | **`options`** | <code><a href="#widgetimagestorefileoptions">WidgetImageStoreFileOptions</a></code> |
 
----
+--------------------
+
 
 ### deleteExcept(...)
 
@@ -111,7 +114,8 @@ This is useful for cleaning up unused images after refreshing or regenerating wi
 | ------------- | --------------------------------------------------------------------------------------------------- |
 | **`options`** | <code><a href="#widgetimagestoredeleteexceptoptions">WidgetImageStoreDeleteExceptOptions</a></code> |
 
----
+--------------------
+
 
 ### list(...)
 
@@ -127,7 +131,8 @@ Lists all saved image filenames.
 
 **Returns:** <code>Promise&lt;{ files: string[]; }&gt;</code>
 
----
+--------------------
+
 
 ### exists(...)
 
@@ -143,7 +148,8 @@ Checks if the given image exists.
 
 **Returns:** <code>Promise&lt;{ exists: boolean; }&gt;</code>
 
----
+--------------------
+
 
 ### getPath(...)
 
@@ -159,20 +165,25 @@ Returns the full path to the image file.
 
 **Returns:** <code>Promise&lt;{ path: string; }&gt;</code>
 
----
+--------------------
+
 
 ### Interfaces
+
 
 #### WidgetImageStoreSaveOptions
 
 Options for saving an image to storage.
 
-| Prop           | Type                 | Description                                                    |
-| -------------- | -------------------- | -------------------------------------------------------------- |
-| **`base64`**   | <code>string</code>  | Base64 encoded image string, optionally with data URL prefix   |
-| **`filename`** | <code>string</code>  | Filename to store the image under (e.g. `example.jpg`)         |
-| **`appGroup`** | <code>string</code>  | App Group ID (iOS), ignored on Android                         |
-| **`resize`**   | <code>boolean</code> | Whether to resize image to max 1024px before saving (optional) |
+| Prop           | Type                                                                                | Description                                                                                                                                                                                                                                                                                                            |
+| -------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`base64`**   | <code>string</code>                                                                 | Base64 encoded image string, optionally with data URL prefix                                                                                                                                                                                                                                                           |
+| **`filename`** | <code>string</code>                                                                 | Filename to store the image under (e.g. `example.jpg`)                                                                                                                                                                                                                                                                 |
+| **`appGroup`** | <code>string</code>                                                                 | App Group ID (iOS), ignored on Android                                                                                                                                                                                                                                                                                 |
+| **`resize`**   | <code>boolean</code>                                                                | Whether to resize image to max 1024px before saving (optional)                                                                                                                                                                                                                                                         |
+| **`format`**   | <code><a href="#widgetimagestoreimageformat">WidgetImageStoreImageFormat</a></code> | Output format strategy. - Omitted or `auto`: chooses based on explicit source type when available and preserves alpha when needed - `jpeg` / `jpg`, `png`, `webp`: forces a concrete format If `filename` includes an extension, it must match the resolved output format. Filenames without an extension are allowed. |
+| **`quality`**  | <code>number</code>                                                                 | Compression quality between 0 and 1. Used by lossy formats (`jpeg` and lossy `webp`), ignored by `png`. Defaults to `0.85`.                                                                                                                                                                                            |
+
 
 #### WidgetImageStoreFileOptions
 
@@ -183,6 +194,7 @@ Options for deleting an image.
 | **`filename`** | <code>string</code> | Filename of the image to delete        |
 | **`appGroup`** | <code>string</code> | App Group ID (iOS), ignored on Android |
 
+
 #### WidgetImageStoreDeleteExceptOptions
 
 Options for deleting all images except specific ones.
@@ -192,6 +204,7 @@ Options for deleting all images except specific ones.
 | **`keep`**     | <code>string[]</code> | List of filenames to keep. All other images will be deleted. |
 | **`appGroup`** | <code>string</code>   | App Group ID (iOS), ignored on Android.                      |
 
+
 #### WidgetImageStoreListOptions
 
 Options for listing all saved images.
@@ -199,5 +212,13 @@ Options for listing all saved images.
 | Prop           | Type                | Description                            |
 | -------------- | ------------------- | -------------------------------------- |
 | **`appGroup`** | <code>string</code> | App Group ID (iOS), ignored on Android |
+
+
+### Type Aliases
+
+
+#### WidgetImageStoreImageFormat
+
+<code>'auto' | 'jpeg' | 'jpg' | 'png' | 'webp'</code>
 
 </docgen-api>

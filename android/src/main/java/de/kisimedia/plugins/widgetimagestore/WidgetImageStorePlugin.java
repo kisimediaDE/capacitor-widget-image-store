@@ -6,6 +6,7 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import java.util.Locale;
 import org.json.JSONException;
 
 @CapacitorPlugin(name = "WidgetImageStore")
@@ -18,19 +19,31 @@ public class WidgetImageStorePlugin extends Plugin {
         String base64 = call.getString("base64");
         String filename = call.getString("filename");
         boolean resize = call.getBoolean("resize", false);
+        String format = call.getString("format");
+        Float quality = call.getFloat("quality");
 
         if (base64 == null || filename == null) {
             call.reject("Missing parameters");
             return;
         }
+        if (!isSafeFilename(filename)) {
+            call.reject("Invalid filename. Use a plain filename without path separators.");
+            return;
+        }
+        if (format != null && !isSupportedFormat(format)) {
+            call.reject("Invalid format. Supported values: auto, jpeg, jpg, png, webp");
+            return;
+        }
 
-        String path = implementation.saveBase64Image(getContext(), base64, filename, resize);
+        WidgetImageStore.SaveResult result = implementation.saveBase64Image(getContext(), base64, filename, resize, format, quality);
+        String path = result.getPath();
         if (path != null) {
             JSObject ret = new JSObject();
             ret.put("path", path);
             call.resolve(ret);
         } else {
-            call.reject("Image save failed");
+            String error = result.getError();
+            call.reject(error != null ? error : "Image save failed");
         }
     }
 
@@ -40,6 +53,10 @@ public class WidgetImageStorePlugin extends Plugin {
 
         if (filename == null) {
             call.reject("Filename is required");
+            return;
+        }
+        if (!isSafeFilename(filename)) {
+            call.reject("Invalid filename. Use a plain filename without path separators.");
             return;
         }
 
@@ -81,6 +98,10 @@ public class WidgetImageStorePlugin extends Plugin {
             call.reject("Filename is required");
             return;
         }
+        if (!isSafeFilename(filename)) {
+            call.reject("Invalid filename. Use a plain filename without path separators.");
+            return;
+        }
         boolean exists = implementation.imageExists(getContext(), filename);
         JSObject result = new JSObject();
         result.put("exists", exists);
@@ -94,9 +115,43 @@ public class WidgetImageStorePlugin extends Plugin {
             call.reject("Filename is required");
             return;
         }
+        if (!isSafeFilename(filename)) {
+            call.reject("Invalid filename. Use a plain filename without path separators.");
+            return;
+        }
         String path = implementation.getImagePath(getContext(), filename);
+        if (path == null) {
+            call.reject("Path unavailable");
+            return;
+        }
         JSObject result = new JSObject();
         result.put("path", path);
         call.resolve(result);
+    }
+
+    private boolean isSupportedFormat(String value) {
+        switch (value.toLowerCase(Locale.ROOT)) {
+            case "auto":
+            case "jpeg":
+            case "jpg":
+            case "png":
+            case "webp":
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isSafeFilename(String filename) {
+        if (filename.isEmpty()) {
+            return false;
+        }
+        if (filename.equals(".") || filename.equals("..")) {
+            return false;
+        }
+        if (filename.contains("/") || filename.contains("\\")) {
+            return false;
+        }
+        return filename.indexOf('\0') == -1;
     }
 }

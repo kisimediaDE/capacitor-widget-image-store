@@ -1,5 +1,8 @@
 import Capacitor
 import Foundation
+import ImageIO
+import UniformTypeIdentifiers
+import UIKit
 
 /// Please read the Capacitor iOS Plugin Development Guide
 /// here: https://capacitorjs.com/docs/plugins/ios
@@ -16,6 +19,11 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "getPath", returnType: CAPPluginReturnPromise),
     ]
     private let implementation = WidgetImageStore()
+    private enum ImageFormat {
+        case jpeg
+        case png
+        case webp
+    }
 
     @objc public func save(_ call: CAPPluginCall) {
         guard let base64 = call.getString("base64"),
@@ -26,10 +34,36 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
 
+        let fileURL: URL
+        switch WidgetImageStorePathGuard.resolveFileURLWithReason(filename: filename, appGroup: appGroup) {
+        case .success(let resolvedURL):
+            fileURL = resolvedURL
+        case .failure(let error):
+            switch error {
+            case .invalidFilename:
+                call.reject("Invalid filename or path")
+            case .appGroupUnavailable:
+                call.reject("App group container unavailable. Check appGroup configuration.")
+            case .invalidPath:
+                call.reject("Invalid filename or path")
+            }
+            return
+        }
+
         let shouldResize = call.getBool("resize") ?? false
+        let requestedFormat = call.getString("format")
+        if let requestedFormat, normalizeFormat(requestedFormat) == nil {
+            call.reject("Invalid format. Supported values: auto, jpeg, jpg, png, webp")
+            return
+        }
+        let requestedQuality = call.getDouble("quality") ?? 0.85
+        let quality = requestedQuality.isFinite
+            ? max(0.0, min(requestedQuality, 1.0))
+            : 0.85
 
         let base64Clean = base64.replacingOccurrences(
             of: "^data:image/[^;]+;base64,", with: "", options: .regularExpression)
+        let mimeType = extractMimeType(from: base64)
 
         guard let data = Data(base64Encoded: base64Clean),
             var image = UIImage(data: data)
@@ -49,17 +83,32 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             UIGraphicsEndImageContext()
         }
 
-        guard let jpgData = image.jpegData(compressionQuality: 0.85) else {
+        let format = resolveFormat(
+            requestedFormat: requestedFormat,
+            filename: filename,
+            mimeType: mimeType,
+            hasAlpha: imageHasAlpha(image)
+        )
+        let fileExtension = (filename as NSString).pathExtension.lowercased()
+        if !fileExtension.isEmpty {
+            guard isExtensionCompatible(fileExtension, with: format) else {
+                let actualExtension = fileExtension.isEmpty ? "(none)" : fileExtension
+                let expectedExtensions = compatibleExtensions(for: format).joined(separator: "/")
+                call.reject(
+                    "Filename extension '\(actualExtension)' does not match resolved format '\(formatName(format))'. Use .\(expectedExtensions)."
+                )
+                return
+            }
+        }
+
+        guard let encodedData = encodeImage(image, format: format, quality: quality) else {
             call.reject("Image conversion failed")
             return
         }
 
-        let dir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup)
-        let fileURL = dir?.appendingPathComponent(filename)
-
         do {
-            try jpgData.write(to: fileURL!)
-            call.resolve(["path": fileURL!.path])
+            try encodedData.write(to: fileURL, options: .atomic)
+            call.resolve(["path": fileURL.path])
         } catch {
             call.reject("File write error: \(error.localizedDescription)")
         }
@@ -71,6 +120,10 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
 
         guard !filename.isEmpty && !appGroup.isEmpty else {
             call.reject("Filename and App Group are required")
+            return
+        }
+        guard WidgetImageStorePathGuard.isSafeFilename(filename) else {
+            call.reject("Invalid filename or path")
             return
         }
 
@@ -110,18 +163,194 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             call.reject("Missing parameters")
             return
         }
+        guard WidgetImageStorePathGuard.isSafeFilename(filename) else {
+            call.reject("Invalid filename or path")
+            return
+        }
         let exists = implementation.imageExists(filename: filename, appGroup: appGroup)
         call.resolve(["exists": exists])
     }
 
     @objc public func getPath(_ call: CAPPluginCall) {
         guard let filename = call.getString("filename"),
-            let appGroup = call.getString("appGroup"),
-            let path = implementation.imagePath(filename: filename, appGroup: appGroup)
+            let appGroup = call.getString("appGroup")
         else {
-            call.reject("Missing parameters or path unavailable")
+            call.reject("Missing parameters")
+            return
+        }
+        guard WidgetImageStorePathGuard.isSafeFilename(filename) else {
+            call.reject("Invalid filename or path")
+            return
+        }
+        guard let path = implementation.imagePath(filename: filename, appGroup: appGroup) else {
+            call.reject("Path unavailable")
             return
         }
         call.resolve(["path": path])
+    }
+
+    private func normalizeFormat(_ value: String?) -> String? {
+        guard let value else { return nil }
+        switch value.lowercased() {
+        case "auto":
+            return "auto"
+        case "jpg", "jpeg":
+            return "jpeg"
+        case "png":
+            return "png"
+        case "webp":
+            return "webp"
+        default:
+            return nil
+        }
+    }
+
+    private func formatFromNormalized(_ value: String) -> ImageFormat {
+        switch value {
+        case "png":
+            return .png
+        case "webp":
+            return .webp
+        default:
+            return .jpeg
+        }
+    }
+
+    private func extractMimeType(from base64: String) -> String? {
+        guard
+            let regex = try? NSRegularExpression(
+                pattern: "^data:image/([^;]+);base64,",
+                options: [.caseInsensitive]
+            ),
+            let match = regex.firstMatch(
+                in: base64,
+                options: [],
+                range: NSRange(base64.startIndex..., in: base64)
+            ),
+            let range = Range(match.range(at: 1), in: base64)
+        else {
+            return nil
+        }
+        return base64[range].lowercased()
+    }
+
+    private func resolveFormat(
+        requestedFormat: String?,
+        filename: String,
+        mimeType: String?,
+        hasAlpha: Bool
+    ) -> ImageFormat {
+        if let normalizedRequested = normalizeFormat(requestedFormat), normalizedRequested != "auto" {
+            return formatFromNormalized(normalizedRequested)
+        }
+
+        let fileExtension = (filename as NSString).pathExtension.lowercased()
+        let preferred = normalizeFormat(mimeType) ?? normalizeFormat(fileExtension)
+
+        if preferred == "jpeg", hasAlpha {
+            return .png
+        }
+        if let preferred, preferred != "auto" {
+            return formatFromNormalized(preferred)
+        }
+
+        return hasAlpha ? .png : .jpeg
+    }
+
+    private func imageHasAlpha(_ image: UIImage) -> Bool {
+        guard let alphaInfo = resolvedCGImage(from: image)?.alphaInfo else {
+            return false
+        }
+        switch alphaInfo {
+        case .first, .last, .premultipliedFirst, .premultipliedLast, .alphaOnly:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func compatibleExtensions(for format: ImageFormat) -> [String] {
+        switch format {
+        case .jpeg:
+            return ["jpg", "jpeg"]
+        case .png:
+            return ["png"]
+        case .webp:
+            return ["webp"]
+        }
+    }
+
+    private func isExtensionCompatible(_ fileExtension: String, with format: ImageFormat) -> Bool {
+        return compatibleExtensions(for: format).contains(fileExtension)
+    }
+
+    private func formatName(_ format: ImageFormat) -> String {
+        switch format {
+        case .jpeg:
+            return "jpeg"
+        case .png:
+            return "png"
+        case .webp:
+            return "webp"
+        }
+    }
+
+    private func encodeImage(_ image: UIImage, format: ImageFormat, quality: Double) -> Data? {
+        switch format {
+        case .jpeg:
+            return image.jpegData(compressionQuality: quality)
+        case .png:
+            return image.pngData()
+        case .webp:
+            return webpData(from: image, quality: quality)
+        }
+    }
+
+    private func resolvedCGImage(from image: UIImage) -> CGImage? {
+        if let cgImage = image.cgImage {
+            return cgImage
+        }
+
+        let size = image.size
+        guard size.width > 0, size.height > 0 else {
+            return nil
+        }
+
+        let rendererFormat = UIGraphicsImageRendererFormat.default()
+        rendererFormat.opaque = false
+        rendererFormat.scale = image.scale > 0 ? image.scale : 1.0
+
+        let renderer = UIGraphicsImageRenderer(size: size, format: rendererFormat)
+        let renderedImage = renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
+        return renderedImage.cgImage
+    }
+
+    private func webpData(from image: UIImage, quality: Double) -> Data? {
+        guard let cgImage = resolvedCGImage(from: image) else {
+            return nil
+        }
+
+        let data = NSMutableData()
+        let webpTypeIdentifier = UTType(filenameExtension: "webp")?.identifier ?? "org.webmproject.webp"
+        guard
+            let destination = CGImageDestinationCreateWithData(
+                data,
+                webpTypeIdentifier as CFString,
+                1,
+                nil
+            )
+        else {
+            return nil
+        }
+
+        let options: [CFString: Any] = [kCGImageDestinationLossyCompressionQuality: quality]
+        CGImageDestinationAddImage(destination, cgImage, options as CFDictionary)
+        guard CGImageDestinationFinalize(destination) else {
+            return nil
+        }
+
+        return data as Data
     }
 }

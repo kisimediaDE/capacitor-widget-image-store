@@ -39,6 +39,8 @@ export interface WidgetImageStorePlugin {
   getPath(options: WidgetImageStoreFileOptions): Promise<{ path: string }>;
 }
 
+export type WidgetImageStoreImageFormat = 'auto' | 'jpeg' | 'jpg' | 'png' | 'webp';
+
 /**
  * Options for saving an image to storage.
  */
@@ -54,6 +56,23 @@ export interface WidgetImageStoreSaveOptions {
 
   /** Whether to resize image to max 1024px before saving (optional) */
   resize?: boolean;
+
+  /**
+   * Output format strategy.
+   * - Omitted or `auto`: chooses based on explicit source type when available and preserves alpha when needed
+   * - `jpeg` / `jpg`, `png`, `webp`: forces a concrete format
+   *
+   * If `filename` includes an extension, it must match the resolved output format.
+   * Filenames without an extension are allowed.
+   */
+  format?: WidgetImageStoreImageFormat;
+
+  /**
+   * Compression quality between 0 and 1.
+   * Used by lossy formats (`jpeg` and lossy `webp`), ignored by `png`.
+   * Defaults to `0.85`.
+   */
+  quality?: number;
 }
 
 /**
