@@ -35,13 +35,14 @@ public class WidgetImageStorePlugin extends Plugin {
             return;
         }
 
-        String path = implementation.saveBase64Image(getContext(), base64, filename, resize, format, quality);
+        WidgetImageStore.SaveResult result = implementation.saveBase64Image(getContext(), base64, filename, resize, format, quality);
+        String path = result.getPath();
         if (path != null) {
             JSObject ret = new JSObject();
             ret.put("path", path);
             call.resolve(ret);
         } else {
-            String error = implementation.getLastError();
+            String error = result.getError();
             call.reject(error != null ? error : "Image save failed");
         }
     }

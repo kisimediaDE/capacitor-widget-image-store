@@ -59,8 +59,11 @@ export interface WidgetImageStoreSaveOptions {
 
   /**
    * Output format strategy.
-   * - `auto`: chooses based on explicit source type when available and preserves alpha when needed
+   * - Omitted or `auto`: chooses based on explicit source type when available and preserves alpha when needed
    * - `jpeg` / `jpg`, `png`, `webp`: forces a concrete format
+   *
+   * If `filename` includes an extension, it must match the resolved output format.
+   * Filenames without an extension are allowed.
    */
   format?: WidgetImageStoreImageFormat;
 

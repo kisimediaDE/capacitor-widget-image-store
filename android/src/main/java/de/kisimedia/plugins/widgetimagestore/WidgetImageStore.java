@@ -15,15 +15,40 @@ import java.util.Set;
 
 public class WidgetImageStore {
 
-    private String lastError;
-
     private enum ImageFormat {
         JPEG,
         PNG,
         WEBP
     }
 
-    public String saveBase64Image(
+    public static final class SaveResult {
+
+        private final String path;
+        private final String error;
+
+        private SaveResult(String path, String error) {
+            this.path = path;
+            this.error = error;
+        }
+
+        public static SaveResult success(String path) {
+            return new SaveResult(path, null);
+        }
+
+        public static SaveResult failure(String error) {
+            return new SaveResult(null, error);
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public String getError() {
+            return error;
+        }
+    }
+
+    public SaveResult saveBase64Image(
         Context context,
         String base64,
         String filename,
@@ -31,7 +56,6 @@ public class WidgetImageStore {
         String requestedFormat,
         Float requestedQuality
     ) {
-        lastError = null;
         try {
             String cleanBase64 = base64.replaceAll("^data:image/[^;]+;base64,", "");
             byte[] decoded = Base64.decode(cleanBase64, Base64.DEFAULT);
@@ -39,7 +63,7 @@ public class WidgetImageStore {
 
             Bitmap bitmap = BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
             if (bitmap == null) {
-                return null;
+                return SaveResult.failure("Image decoding failed");
             }
 
             if (resize) {
@@ -69,44 +93,35 @@ public class WidgetImageStore {
                         expectedBuilder.append(compatible[i]);
                     }
                     String expectedExtensions = expectedBuilder.toString();
-                    lastError =
+                    return SaveResult.failure(
                         "Filename extension '" +
-                        actualExtension +
-                        "' does not match resolved format '" +
-                        formatName(format) +
-                        "'. Use ." +
-                        expectedExtensions +
-                        ".";
-                    return null;
+                            actualExtension +
+                            "' does not match resolved format '" +
+                            formatName(format) +
+                            "'. Use ." +
+                            expectedExtensions +
+                            "."
+                    );
                 }
             }
             int compressionQuality = Math.round(sanitizeQuality(requestedQuality) * 100f);
 
             File file = resolveSafeFile(context, filename);
             if (file == null) {
-                lastError = "Invalid filename path";
-                return null;
+                return SaveResult.failure("Invalid filename path");
             }
             try (FileOutputStream out = new FileOutputStream(file)) {
                 boolean success = bitmap.compress(resolveCompressFormat(format), compressionQuality, out);
                 if (!success) {
-                    lastError = "Image encoding failed";
-                    return null;
+                    return SaveResult.failure("Image encoding failed");
                 }
                 out.flush();
-                return file.getAbsolutePath();
+                return SaveResult.success(file.getAbsolutePath());
             }
         } catch (Exception e) {
             e.printStackTrace();
-            if (lastError == null) {
-                lastError = "Image save failed";
-            }
-            return null;
+            return SaveResult.failure("Image save failed");
         }
-    }
-
-    public String getLastError() {
-        return lastError;
     }
 
     private Bitmap.CompressFormat resolveCompressFormat(ImageFormat format) {

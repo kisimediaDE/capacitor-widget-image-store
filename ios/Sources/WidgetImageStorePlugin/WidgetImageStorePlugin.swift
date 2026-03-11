@@ -262,7 +262,7 @@ public class WidgetImageStorePlugin: CAPPlugin, CAPBridgedPlugin {
             return false
         }
         switch alphaInfo {
-        case .first, .last, .premultipliedFirst, .premultipliedLast:
+        case .first, .last, .premultipliedFirst, .premultipliedLast, .alphaOnly:
             return true
         default:
             return false
